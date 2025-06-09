@@ -1,3 +1,5 @@
+const qs = require('qs');
+
 class APIFeatures{
     constructor(query, queryStr){
         this.query = query;
@@ -5,16 +7,17 @@ class APIFeatures{
     }
 
     filter(){
-        const queryObj = {...this.queryStr};
-        const excludedFields = ['page', 'sort', 'limit', 'fields'];
-        excludedFields.forEach(el => delete queryObj[el]);
+        const queryObj = qs.parse(this.queryStr || this.query);
+         const excludedFields = ['page', 'sort', 'limit', 'fields'];
+         excludedFields.forEach(el => delete queryObj[el]);
 
-        //1b) Advanced filtering
+        // //1b) Advanced filtering
         let queryStr = JSON.stringify(queryObj);
         queryStr = queryStr.replace(/\b(gte|gt|lte|lt)\b/g, match => `$${match}`)
-        this.query.find(JSON.parse(queryStr));
-        //let query = Tour.find(JSON.parse(queryStr));
-        return this;
+        const mongoFormatted = JSON.parse(queryStr);
+        console.log(mongoFormatted);
+    this.query = this.query.find(mongoFormatted);
+    return this;
     }
 
     sort(){
@@ -22,9 +25,8 @@ class APIFeatures{
             const sortBy = this.queryStr.sort.split(',').join(' ');
             console.log(sortBy);
             this.query = this.query.sort(sortBy);
-            //sort('price ratingsaverage')
         }else{
-            this.query = this.query.sort('-createdAt');
+            this.query = this.query.sort('-createdAt')
         }
         return this;
     }
