@@ -13,6 +13,7 @@ next();
 
 const APIFeatures = require('./../utils/apiFeatures')
 
+
 exports.getAllTours = async (req, res) => {
     try{
 
