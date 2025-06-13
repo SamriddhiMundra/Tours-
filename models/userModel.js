@@ -58,12 +58,12 @@ userSchema.methods.correctPassword = async function(candidatePassword, userPassw
   //this.password is not available because we did select: false in password
   return await bcrypt.compare(candidatePassword, userPassword);
 }
-
+//ANOTHER INSTANCE METHOD
 userSchema.methods.changePassword = async function(JWTTimestamp){
   if(this.passwordChangedAt){
     const changedTimeStamp = parseInt(this.passwordChangedAt.getTime()/1000, 10);
     console.log(changedTimeStamp, JWTTimestamp);
-    return JWTTimestamp<changedTimeStamp;
+    return JWTTimestamp < changedTimeStamp;
   }
   //false means not changed
   return false;

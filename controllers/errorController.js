@@ -15,7 +15,7 @@ const handleValidatorErrorDB = err =>{
   const message= `Invalid input data. ${errors.join('. ')}`;
   return new AppError(message, 400);
 }
-const handleJWTError =() => new AppError('Invalid Token, Please login again', 401);
+const handleJWTError = () => new AppError('Invalid Token, Please login again', 401);
 
 const handleJWTExpiredError = () => new AppError('Token expired, Please login again', 401);
 
