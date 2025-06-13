@@ -52,5 +52,11 @@ userSchema.pre('save', async function(next) {
   
 })
 
+//INSTANCE METHOD
+userSchema.methods.correctPassword = async function(candidatePassword, userPassword){
+  //this.password is not available because we did select: false in password
+  return await bcrypt.compare(candidatePassword, userPassword);
+}
+
 const User = mongoose.model('User', userSchema);
 module.exports = User;
