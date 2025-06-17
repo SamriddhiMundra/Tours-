@@ -109,7 +109,7 @@ if(!user){
 //2. Generate random reset token.
 //create instance method of user in usermodel
 const resetToken = user.createPasswordResetToken();
-await user.save({validateBeforeSave: false});
+await user.save({validateBeforeSave: false}); //imp** validateBeforeSave-> to remove all validators before saving taaki val vala error nhi aaye
 
 //3. Send it to user's email
 const resetURL = `${req.protocol}://${req.get('host')}/api/v1/users/resetPassword/${resetToken}`
