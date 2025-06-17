@@ -40,7 +40,11 @@ app.all('*', (req, res, next) => {
   next(new AppError(`Can't find ${req.originalUrl} on the server`, 404));
 });
 
-app.use(globalErrorHandler);
+app.use((err, req, res, next) => {
+  console.log('🔥 GLOBAL ERROR HANDLER CALLED:', err.message); // <- this MUST appear
+  globalErrorHandler(err, req, res, next);
+});
+
 
 
 

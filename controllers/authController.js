@@ -173,7 +173,8 @@ exports.resetPassword = catchAsync( async(req, res, next) => {
     user.password = req.body.password;
     user.passwordConfirm = req.body.passwordConfirm;
     await user.save();
-    //User.findByIdAndUpdate will not work as intended
+    //User.findByIdAndUpdate will not work as intended bcoz validator in userSchema will not work, it works only on save and create, but not on update
+    //and pre save middlewares will also not work
 
     //4. log user in, send jwt
     createSendToken(user, 200, res)

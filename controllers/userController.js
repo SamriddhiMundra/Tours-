@@ -1,4 +1,5 @@
-const AppError = require('../utils/appError');
+const AppError = require('./../utils/appError');
+
 const User = require(`./../models/userModel`);
 const catchAsync = require('./../utils/catchAsync');
 
@@ -12,7 +13,7 @@ exports.getAllUsers = catchAsync( async (req, res, next) => {
     })
 })
 
-exports.updateMe = (req, res, next) => {
+exports.updateMe = catchAsync( async(req, res, next) => {
     //1. create error if user POSTs password data
     if(req.body.password || req.body.passwordConfirm){
         return next(new AppError('This route is not for password updates. Please use updateMyPassword', 400));
@@ -23,7 +24,7 @@ exports.updateMe = (req, res, next) => {
     res.status(200).json({
         status: 'success'
     })
-}
+})
 exports.getUser = (req, res) => {
     res.status(500).json({
         status: 'error',
