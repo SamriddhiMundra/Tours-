@@ -4,6 +4,8 @@ const validator = require('validator');
 
 const slugify = require('slugify');
 
+//const User = require('./userModel')
+
 const tourSchema = new mongoose.Schema({
     name: {
       type: String,
@@ -80,7 +82,38 @@ const tourSchema = new mongoose.Schema({
     secretTour: {
       type: Boolean,
       default: false
-    }
+    },
+    startLocation: {
+      //GeoJSON
+      type: {
+        type: String,
+        default: 'Point',
+        enum: ['Point']
+      },
+      coordinates:[Number], //longitude first, then latitude
+      address: String,
+      description: String
+    },
+    locations: [
+      {
+        type: {
+          type: String,
+          default: 'Point',
+          enum: ['Point']
+        },
+        coordinates: [Number],
+        address: String,
+        description: String,
+        day: Number
+      }
+    ],
+    //guides: Array
+    guides: [
+      {
+        type: mongoose.Schema.ObjectId,
+        ref: 'User'
+      }
+    ]
 
   }, 
 
@@ -101,6 +134,12 @@ const tourSchema = new mongoose.Schema({
     this.slug = slugify(this.name, {lower: true});
     next();
   })
+
+  // tourSchema.pre('save', async function(next) {
+  //   const guidesPromises = this.guides.map(async id => await User.findById(id));
+  //   this.guides = await Promise.all(guidesPromises)
+  //  next();
+  // })
   // tourSchema.pre('save', (next) =>{
   //   console.log("Will save document...");
   //   next();
@@ -119,6 +158,13 @@ const tourSchema = new mongoose.Schema({
     this.start = Date.now();
     next();
   })
+  tourSchema.pre(/^find/, function(next){
+    this.populate({
+      path: 'guides',
+      select: '-__v -passwordChangedAt'
+     });
+     next();
+  })
 
   tourSchema.post(/^find/, function(doc, next){
     console.log(`Query took ${Date.now() - this.start} milliseconds`);
@@ -126,6 +172,7 @@ const tourSchema = new mongoose.Schema({
     //console.log(doc);
     next();
   })
+
 
   //AGGREGATION MIDDLEWARE
   tourSchema.pre('aggregate', function(next){
