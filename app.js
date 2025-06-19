@@ -32,6 +32,7 @@ const AppError = require('./utils/appError');
 const globalErrorHandler = require('./controllers/errorController');
 const tourRouter = require(`${__dirname}/routes/tourRoutes`);
 const userRouter = require(`${__dirname}/routes/userRoutes`);
+const reviewRouter = require(`${__dirname}/routes/reviewRoutes`);
 
 //Body Parser, reading data from body into req.body
 app.use(express.json({limit: '10kb'}));
@@ -63,6 +64,7 @@ app.use((req, res, next) => {
 });
 app.use('/api/v1/tours', tourRouter);
 app.use('/api/v1/users', userRouter);
+app.use('/api/v1/reviews', reviewRouter);
 
 
 app.all('*', (req, res, next) => {

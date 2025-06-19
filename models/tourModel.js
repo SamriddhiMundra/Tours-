@@ -114,6 +114,7 @@ const tourSchema = new mongoose.Schema({
         ref: 'User'
       }
     ]
+    
 
   }, 
 
@@ -122,9 +123,18 @@ const tourSchema = new mongoose.Schema({
   toObject: {virtuals: true}
 })
 
+
   tourSchema.virtual('durationWeeks').get(function(){
     return this.duration/7;
   })
+
+//virtual populate
+tourSchema.virtual('reviews', {
+  ref: 'Review', //model name
+  foreignField: 'tour', //field in review model
+  localField: '_id' //field in tour model
+})
+
 //DOCUMENT MIDDLEWARE
 //runs before .save() and .create()
 //this save middleware runs only for .save() and .create(); not for findbyID and all...

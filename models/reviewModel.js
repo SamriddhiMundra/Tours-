@@ -5,6 +5,7 @@ const validator = require('validator');
 
 const slugify = require('slugify');
 
+
 const reviewSchema = new mongoose.Schema(
     {
       review: {
@@ -37,5 +38,26 @@ const reviewSchema = new mongoose.Schema(
     }
   );
   
+
+  reviewSchema.pre(/^find/, function(next){
+    // this.populate({ //this will add 2 extra queries to the find query
+    //   //populate tour and user
+    //   path: 'tour',
+    //   select: 'name'
+    //  }).populate({
+    //   path: 'user',
+    //   select: 'name photo'
+    //  })
+
+    this.populate({
+      path: 'user',
+      select: 'name photo'
+     })
+     next();
+  })
 const Review = mongoose.model('Review', reviewSchema);
+
+
+
 module.exports = Review;
+
