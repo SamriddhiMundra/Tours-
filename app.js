@@ -1,4 +1,5 @@
 /* eslint-disable import/no-dynamic-require */
+const path = require('path');
 const express = require('express');
 const morgan = require('morgan');
 const rateLimit = require('express-rate-limit');
@@ -9,7 +10,15 @@ const hpp = require('hpp');
 
 const app = express();
 
+app.set('view engine', 'pug');
+app.set('views', path.join(__dirname, 'views')); //we cannot use ./views
+
 //1 GLOBAL MIDDLEWARES
+
+//serving static files
+//app.use(express.static(`${__dirname}/public`));
+app.use(express.static(path.join(__dirname, 'public'))); //we cannot use ./public
+//all static files are served from public folder
 
 //set security HTTP headers
 app.use(helmet());
@@ -30,9 +39,10 @@ app.use('/api', limiter);
 
 const AppError = require('./utils/appError');
 const globalErrorHandler = require('./controllers/errorController');
-const tourRouter = require(`${__dirname}/routes/tourRoutes`);
-const userRouter = require(`${__dirname}/routes/userRoutes`);
-const reviewRouter = require(`${__dirname}/routes/reviewRoutes`);
+const tourRouter = require('./routes/tourRoutes');
+const userRouter = require('./routes/userRoutes');
+const reviewRouter = require('./routes/reviewRoutes');
+const viewRouter = require(`${__dirname}/routes/viewRoutes`);
 
 //Body Parser, reading data from body into req.body
 app.use(express.json({limit: '10kb'}));
@@ -48,8 +58,7 @@ app.use(hpp({
   whitelist: ['duration', 'ratingAverage', 'ratingsQuantity', 'maxGroupSize', 'difficulty', 'price']
 }));
 
-//serving static files
-app.use(express.static(`${__dirname}/public`));
+
 
 // app.use((req, res, next) => {
 //   console.log('Hello from middleware!');
@@ -62,6 +71,9 @@ app.use((req, res, next) => {
   console.log(req.headers);
   next();
 });
+
+
+app.use('/', viewRouter); //this is for pug files, so that we can render them
 app.use('/api/v1/tours', tourRouter);
 app.use('/api/v1/users', userRouter);
 app.use('/api/v1/reviews', reviewRouter);
