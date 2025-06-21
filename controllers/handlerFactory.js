@@ -68,6 +68,7 @@ exports.getAll = Model => catchAsync(async (req, res, next) => {
     if(req.params.tourId) filter={tour: req.params.tourId}; //if tourId is provided in params, filter reviews by tourId
 
     const features = new APIFeatures(Model.find(filter), req.query).filter().sort().limitFields().paginate()
+//const doc = await features.query.explain();
 const doc = await features.query;
     //query.sort().select().skip().limit()
 

@@ -1,9 +1,11 @@
-//review / rating / createdAt / ref to tour / ref to user
+
 const mongoose = require('mongoose');
 
 const validator = require('validator');
 
 const slugify = require('slugify');
+
+const Tour = require('./tourModel');
 
 
 const reviewSchema = new mongoose.Schema(
@@ -37,6 +39,8 @@ const reviewSchema = new mongoose.Schema(
       toObject: { virtuals: true }
     }
   );
+
+  reviewSchema.index({ tour: 1, user: 1 }, { unique: true }); //to prevent duplicate reviews by same user for same tour
   
 
   reviewSchema.pre(/^find/, function(next){
@@ -55,6 +59,61 @@ const reviewSchema = new mongoose.Schema(
      })
      next();
   })
+
+
+  //static method bhi... mongoose
+  reviewSchema.statics.calcAverageRatings = async function(tourId) {
+    const stats = await this.aggregate([
+      {
+        $match: { tour: tourId }
+      },
+      {
+        $group: {
+          _id: '$tour',
+          nRating: { $sum: 1 },
+          avgRating: { $avg: '$rating' }
+        }
+      }
+    ]);
+
+    //console.log(stats);
+
+    
+  
+    if (stats.length > 0) {
+      await Tour.findByIdAndUpdate(tourId, {
+        ratingsQuantity: stats[0].nRating,
+        ratingAverage: stats[0].avgRating
+      });
+    } else {
+      await Tour.findByIdAndUpdate(tourId, {
+        ratingsQuantity: 0,
+        ratingAverage: 4.5
+      });
+    }
+    
+  }
+
+  reviewSchema.post('save', async function() {  //-->  cannot put this after Review...bcoz midwar wont contain it
+    //this points to current review
+    await this.constructor.calcAverageRatings(this.tour);
+    
+  });
+
+  // Mongoose middleware to handle updates/deletes
+
+reviewSchema.pre(/^findOneAnd/, async function (next) {
+  this.reviewDoc = await this.findOne(); // Store document before update/delete
+  next();
+});
+
+reviewSchema.post(/^findOneAnd/, async function () {
+  if (this.reviewDoc) {
+    await this.reviewDoc.constructor.calcAverageRatings(this.reviewDoc.tour);
+  }
+});
+
+
 const Review = mongoose.model('Review', reviewSchema);
 
 

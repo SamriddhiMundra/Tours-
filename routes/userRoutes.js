@@ -8,9 +8,15 @@ router.post('/signup', authController.signup);
 router.post('/login', authController.login);
 router.post('/forgotPassword', authController.forgotPassword);
 router.patch('/resetPassword/:token', authController.resetPassword);
-router.patch('/updateMyPassword', authController.protect, authController.updatePassword);
-router.patch('/updateMe', authController.protect, userController.updateMe)
-router.delete('/deleteMe', authController.protect, userController.deleteMe);
+
+router.use(authController.protect);// all routes after this will be protected, i.e. user must be logged in
+
+router.patch('/updateMyPassword',  authController.updatePassword);
+router.get('/me',  userController.getMe, userController.getUser); 
+router.patch('/updateMe',  userController.updateMe)
+router.delete('/deleteMe',  userController.deleteMe);
+
+router.use(authController.restrictTo('admin')); // all routes after this will be restricted to admin only
 
 router
     .route('/')

@@ -116,3 +116,66 @@ exports.getMonthlyPlan = catchAsync( async (req, res, next) =>{
             }
         })
 })
+
+exports.getToursWithin = catchAsync(async (req, res, next) => {
+    const {distance, latlng, unit} = req.params;  //destructuring
+    const [lat, lng] = latlng.split(',');
+
+    if(!lat || !lng){
+        return next(new AppError('Please provide latitute and longitude in the format lat,lng.', 400));
+    }
+//console.log(distance, latlng, unit);
+    //distance in km
+    //convert distance to radians
+    const radius = unit === 'mi' ? distance / 3963.2 : distance / 6378.1; //earth radius in miles and km
+
+    const tours = await Tour.find({
+        startLocation: {$geoWithin: {$centerSphere: [[lng, lat], radius]}} //just like mongoose operator only
+    });
+
+    res.status(200).json({
+        status: 'success',
+        results: tours.length,
+        data: {
+            data: tours
+        }
+    })
+})
+
+exports.getDistances = catchAsync(async (req, res, next) => {
+    const {latlng, unit} = req.params;  //destructuring
+    const [lat, lng] = latlng.split(',');
+
+    if(!lat || !lng){
+        return next(new AppError('Please provide latitute and longitude in the format lat,lng.', 400));
+    }
+
+    const multiplier = unit === 'mi' ? 0.000621371 : 0.001; //to convert to miles or km  
+
+    const distances = await Tour.aggregate([
+        {
+            $geoNear: { //only geospatial pipeline stage which need to be at first
+                near: {
+                    type: 'Point',
+                    coordinates: [lng * 1, lat * 1] //convert to number
+                },
+                distanceField: 'distance',
+                distanceMultiplier: multiplier,
+                spherical: true //to use spherical geometry
+            }
+        },
+        {
+            $project: {
+                distance: 1,
+                name: 1
+            }
+        }
+    ]);
+
+    res.status(200).json({
+        status: 'success',
+        data: {
+            data: distances
+        }
+    })
+})
